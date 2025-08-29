@@ -6,15 +6,25 @@
     <form id="loginForm" action="/login" method="post" class="space-y-4">
       <div>
         <label class="block text-sm font-medium">Usuario</label>
-        <input name="username" id="username" class="mt-1 block w-full rounded-md border p-2" required autofocus />
+        <input name="username" id="username"
+               class="mt-1 block w-full rounded-md border p-2"
+               required autofocus />
       </div>
       <div>
         <label class="block text-sm font-medium">PIN (4 dígitos)</label>
-        <input type="text" name="pin" pattern="[0-9]{4}" maxlength="4"
-               class="mt-1 block w-full rounded-md border p-2" required />
+        <input type="password" 
+               name="pin" 
+               pattern="[0-9]{4}" 
+               maxlength="4" 
+               inputmode="numeric"
+               class="mt-1 block w-full rounded-md border p-2 tracking-widest text-center"
+               required />
       </div>
       <div class="flex items-center gap-3">
-        <button type="submit" id="loginBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-md">Entrar</button>
+        <button type="submit" id="loginBtn"
+                class="bg-indigo-600 text-white px-4 py-2 rounded-md">
+          Entrar
+        </button>
         <a href="/register" class="text-sm text-gray-600">Crear cuenta</a>
       </div>
     </form>
