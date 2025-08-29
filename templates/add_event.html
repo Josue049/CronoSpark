@@ -4,44 +4,153 @@
   <div class="bg-white rounded-2xl p-6 shadow">
     <h2 class="text-2xl font-semibold mb-4">Agregar evento</h2>
 
-    <form action="/add" method="post" class="space-y-4">
+    <form id="addEventForm" action="/add" method="post" class="space-y-4" novalidate>
       <div>
-        <label class="block text-sm font-medium">Título</label>
-        <input name="title" class="mt-1 block w-full rounded-md border p-2" required />
+        <label for="title" class="block text-sm font-medium">Título</label>
+        <input id="title" name="title" class="mt-1 block w-full rounded-md border p-2" required
+               placeholder="Reunión con equipo, Pago, Llamada, etc." />
+        <p id="titleHelp" class="mt-1 text-xs text-gray-400">Un título claro ayuda a priorizar.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <label class="block text-sm font-medium">Fecha</label>
-          <input type="date" name="date" class="mt-1 block w-full rounded-md border p-2" />
+          <label for="date" class="block text-sm font-medium">Fecha</label>
+          <input id="date" type="date" name="date" class="mt-1 block w-full rounded-md border p-2" />
         </div>
         <div>
-          <label class="block text-sm font-medium">Hora</label>
-          <input type="time" name="time" class="mt-1 block w-full rounded-md border p-2" />
+          <label for="time" class="block text-sm font-medium">Hora</label>
+          <input id="time" type="time" name="time" class="mt-1 block w-full rounded-md border p-2" />
+        </div>
+      </div>
+
+      <div id="daysPreview" class="hidden mt-1">
+        <div class="inline-flex items-center gap-2 text-sm text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span id="daysLabel" class="font-medium"></span>
         </div>
       </div>
 
       <div>
-        <label class="block text-sm font-medium">Descripción</label>
-        <textarea name="description" rows="3" class="mt-1 block w-full rounded-md border p-2"></textarea>
+        <label for="description" class="block text-sm font-medium">Descripción</label>
+        <textarea id="description" name="description" rows="3" class="mt-1 block w-full rounded-md border p-2"
+                  placeholder="Notas, agenda o lo que necesites recordar..."></textarea>
       </div>
 
       <div>
-        <label class="block text-sm font-medium">Enlace / Recordatorio (URL)</label>
-        <input name="link" placeholder="https://..." class="mt-1 block w-full rounded-md border p-2" />
+        <label for="link" class="block text-sm font-medium">Enlace / Recordatorio (URL)</label>
+        <input id="link" name="link" placeholder="https://..." class="mt-1 block w-full rounded-md border p-2" />
+        <p id="linkHelp" class="mt-1 text-xs text-gray-400">Si pegas algo como <code>bit.ly/xyz</code> lo convertimos en URL al guardar.</p>
       </div>
 
-      <div class="flex items-center gap-3">
-        <label class="inline-flex items-center">
-          <input type="checkbox" name="urgent" class="mr-2" />
-          <span>Marcar como urgente</span>
-        </label>
-      </div>
+      <div class="flex items-start gap-4">
+        <!-- Toggle visual para urgente -->
+        <div class="flex items-center space-x-3">
+          <label for="urgent" class="inline-flex items-center cursor-pointer select-none">
+            <div id="urgentToggle" class="w-11 h-6 flex items-center bg-gray-300 rounded-full p-1 transition-colors">
+              <div class="bg-white w-4 h-4 rounded-full shadow-md transform transition-transform"></div>
+            </div>
+            <input id="urgent" type="checkbox" name="urgent" class="sr-only" />
+            <span class="ml-2 text-sm">Marcar como urgente</span>
+          </label>
+          <span class="text-xs text-gray-400">Resalta y prioriza este evento.</span>
+        </div>
 
-      <div class="flex items-center gap-3">
-        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md">Guardar evento</button>
-        <a href="/" class="text-sm text-gray-600">Cancelar</a>
+        <!-- Botones -->
+        <div class="ml-auto flex items-center gap-3">
+          <button id="saveBtn" type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md">Guardar evento</button>
+          <a href="/" class="text-sm text-gray-600">Cancelar</a>
+        </div>
       </div>
     </form>
   </div>
+
+  <script>
+    // ===== Helpers =====
+    const dateInput = document.getElementById('date');
+    const daysPreview = document.getElementById('daysPreview');
+    const daysLabelSpan = document.getElementById('daysLabel');
+    const linkInput = document.getElementById('link');
+    const urgentCheckbox = document.getElementById('urgent');
+    const urgentToggle = document.getElementById('urgentToggle');
+    const addEventForm = document.getElementById('addEventForm');
+
+    // Toggle visual: mueve el knob cuando se marca/desmarca
+    function refreshToggleVisual() {
+      const knob = urgentToggle.querySelector('div');
+      if (urgentCheckbox.checked) {
+        urgentToggle.classList.remove('bg-gray-300');
+        urgentToggle.classList.add('bg-red-500');
+        knob.style.transform = 'translateX(18px)';
+      } else {
+        urgentToggle.classList.remove('bg-red-500');
+        urgentToggle.classList.add('bg-gray-300');
+        knob.style.transform = 'translateX(0px)';
+      }
+    }
+    urgentCheckbox.addEventListener('change', refreshToggleVisual);
+    // click en el contenedor también cambia el checkbox
+    urgentToggle.parentElement.addEventListener('click', (e) => {
+      // evitar doble toggle si el click fue en el input oculto
+      if (e.target === urgentCheckbox) return;
+      urgentCheckbox.checked = !urgentCheckbox.checked;
+      refreshToggleVisual();
+    });
+    refreshToggleVisual();
+
+    // Calcula días faltantes y muestra etiqueta amigable
+    function updateDaysPreview() {
+      const val = dateInput.value;
+      if (!val) {
+        daysPreview.classList.add('hidden');
+        daysLabelSpan.textContent = '';
+        return;
+      }
+      // Parse date as local
+      const today = new Date();
+      const d = new Date(val + 'T00:00:00'); // evita zonas raras
+      // calcular diferencia en días (normalizado a mediodía evita off-by-one en DST)
+      const diffMs = (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+      const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      let label = '';
+      if (days < 0) label = 'Fecha pasada';
+      else if (days === 0) label = 'Hoy';
+      else if (days === 1) label = 'Mañana';
+      else label = `En ${days} días`;
+      daysLabelSpan.textContent = label;
+      daysPreview.classList.remove('hidden');
+    }
+    dateInput.addEventListener('change', updateDaysPreview);
+    // si la página carga con valor (útil si vuelves al formulario), actualiza
+    window.addEventListener('load', updateDaysPreview);
+
+    // Asegura que la URL tenga esquema; corrige al perder foco
+    function normalizeUrl(u){
+      if (!u) return '';
+      // si ya tiene esquema http/https
+      if (/^https?:\/\//i.test(u)) return u;
+      // else, agregar https:// por defecto
+      return 'https://' + u;
+    }
+    linkInput.addEventListener('blur', (e) => {
+      const normalized = normalizeUrl(e.target.value.trim());
+      if (normalized) e.target.value = normalized;
+    });
+
+    // Validación ligera antes de submit
+    addEventForm.addEventListener('submit', (e) => {
+      // título obligatorio
+      const title = document.getElementById('title').value.trim();
+      if (!title) {
+        e.preventDefault();
+        alert('El título es obligatorio.');
+        return;
+      }
+      // si hay fecha y está en formato inválido (el input date ya protege), no hacemos más aquí.
+      // normalizar link automáticamente
+      linkInput.value = normalizeUrl(linkInput.value.trim());
+      // dejar que el formulario se envíe
+    });
+  </script>
 {% endblock %}
