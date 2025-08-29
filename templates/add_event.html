@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="bg-white rounded-2xl p-6 shadow">
+    <h2 class="text-2xl font-semibold mb-4">Agregar evento</h2>
+
+    <form action="/add" method="post" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium">Título</label>
+        <input name="title" class="mt-1 block w-full rounded-md border p-2" required />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium">Fecha</label>
+          <input type="date" name="date" class="mt-1 block w-full rounded-md border p-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Hora</label>
+          <input type="time" name="time" class="mt-1 block w-full rounded-md border p-2" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium">Descripción</label>
+        <textarea name="description" rows="3" class="mt-1 block w-full rounded-md border p-2"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium">Enlace / Recordatorio (URL)</label>
+        <input name="link" placeholder="https://..." class="mt-1 block w-full rounded-md border p-2" />
+      </div>
+
+      <div class="flex items-center gap-3">
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="urgent" class="mr-2" />
+          <span>Marcar como urgente</span>
+        </label>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md">Guardar evento</button>
+        <a href="/" class="text-sm text-gray-600">Cancelar</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

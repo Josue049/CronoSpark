@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CronoSpark — Calendario</title>
+    <!-- Tailwind CDN para estilo moderno y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body class="bg-gray-50 text-gray-800 antialiased">
+    <header class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white p-4 shadow-md">
+      <div class="max-w-6xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="rounded-full bg-white/20 p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold">CronoSpark</h1>
+            <p class="text-sm opacity-90">Tu calendario personal, rápido y claro</p>
+          </div>
+        </div>
+        <div>
+          <a href="/add" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-md">Agregar evento</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="space-y-2 my-4">
+            {% for category, msg in messages %}
+              <div class="p-3 rounded-md shadow-sm {% if category == 'error' %}bg-red-100 text-red-800{% elif category == 'success' %}bg-green-100 text-green-800{% else %}bg-blue-100 text-blue-800{% endif %}">{{ msg }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Sección principal: lista de eventos -->
+        <section class="md:col-span-3">
+          {% block content %}{% endblock %}
+        </section>
+
+        <!-- Sidebar: Urgentes -->
+        <aside class="md:col-span-1">
+          <div class="bg-white rounded-2xl p-4 shadow">
+            <h3 class="font-semibold text-lg">Urgentes</h3>
+            <p class="text-sm text-gray-500 mb-3">Eventos marcados como urgentes (toques rápidos)</p>
+            <div class="space-y-3">
+              {% if urgent_events %}
+                {% for e in urgent_events %}
+                  <div class="p-3 rounded-lg border-l-4 border-red-400 bg-red-50">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <div class="font-semibold">{{ e.title }}</div>
+                        <div class="text-xs text-gray-600">{{ e.date or 'Sin fecha' }} {{ e.time or '' }}</div>
+                      </div>
+                    </div>
+                    {% if e.link %}
+                      <a href="{{ e.link }}" target="_blank" class="inline-block mt-3 text-sm font-medium px-3 py-1 rounded-full border border-red-400 bg-white/80 hover:scale-105">Abrir enlace</a>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div class="text-sm text-gray-500">No hay eventos urgentes. Respira, puedes con esto.</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mt-4 text-sm text-center text-gray-500">Consejo: marca como urgente los eventos que requieren acción hoy.</div>
+        </aside>
+      </div>
+
+    </main>
+
+    <footer class="text-center text-sm text-gray-500 p-6">CronoSpark • Hecho con ☕ y Python</footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
