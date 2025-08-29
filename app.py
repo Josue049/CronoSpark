@@ -4,20 +4,28 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from models import db
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
-if DATABASE_URL:
-    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+
+# Para Render usamos Postgres, en local seguimos con SQLite
+if os.environ.get("DATABASE_URL"):
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///cronospark.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 db = SQLAlchemy(app)
 
+
+with app.app_context():
+    db.create_all()
+    
 # ---------------------------
 # MODELS
 # ---------------------------
