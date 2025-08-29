@@ -7,11 +7,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 
+# Para Render usamos Postgres, en local seguimos con SQLite
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# Para Render usamos Postgres, en local seguimos con SQLite
-if os.environ.get("DATABASE_URL"):
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL or "sqlite:///db.sqlite"
+
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 
