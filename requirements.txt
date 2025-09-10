@@ -3,3 +3,6 @@ Flask-SQLAlchemy>=3.0
 gunicorn
 python-dotenv
 psycopg2-binary
+pyodbc
+sqlalchemy
+flask_sqlalchemy
