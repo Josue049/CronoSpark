@@ -7,15 +7,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 
-# Para Render usamos Postgres, en local seguimos con SQLite
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL or "sqlite:///db.sqlite"
-
-else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -31,6 +25,7 @@ with app.app_context():
 # MODELS
 # ---------------------------
 class User(db.Model):
+    __tablename__ = "Users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
     pin_hash = db.Column(db.String(256), nullable=False)  # hashed PIN
@@ -42,9 +37,11 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.username}>"
 
+
 class Event(db.Model):
+    __tablename__ = "Events"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("Users.id"), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
     date = db.Column(db.String(50), nullable=True)  # ISO date YYYY-MM-DD
